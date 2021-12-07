@@ -23,55 +23,67 @@
         <link rel="shortcut icon" type="image/jpg" href="favicon.ico"/>
     </head>
     <body>
-    <?php
-        $mysqli = new mysqli("localhost", "root", "", "recommender");
+        <?php
+            $mysqli = new mysqli("localhost", "root", "", "recommender");
 
-        function getColumn($data, $mysqli) {
-            $user = $mysqli->prepare("SELECT {$data} FROM users;");
-            $user->execute();
-            
-            $arr = [];
+            function getColumn($data, $mysqli) {
+                $user = $mysqli->prepare("SELECT {$data} FROM users;");
+                $user->execute();
+                
+                $arr = [];
 
-            foreach ($user->get_result() as $row){
-                $arr[] = $row["{$data}"];
+                foreach ($user->get_result() as $row){
+                    $arr[] = $row["{$data}"];
+                }
+
+                return $arr;
             }
 
-            return $arr;
-        }
+            $logins = array_combine(getColumn("username", $mysqli), getColumn("password", $mysqli));
 
-        $logins = array_combine(getColumn("username", $mysqli), getColumn("password", $mysqli));
+            function redirect($url, $permanent = false) {
+                if (headers_sent() === false) header('Location: ' . $url, true, ($permanent === true) ? 301 : 302);
+                exit();
+            }
 
-        function redirect($url, $permanent = false) {
-            if (headers_sent() === false) header('Location: ' . $url, true, ($permanent === true) ? 301 : 302);
-            exit();
-        }
-
-        if(isset($_POST["user"]) and isset($_POST["pass"])){
-            if(array_key_exists($_POST["user"], $logins) and $_POST["pass"] == $logins[$_POST["user"]]) {
-                $_SESSION["user"] = $_POST["user"];
-                $_SESSION["pass"] = $_POST["pass"];
+            if(isset($_POST["user"]) and isset($_POST["pass"])){
+                if(array_key_exists($_POST["user"], $logins) and $_POST["pass"] == $logins[$_POST["user"]]) {
+                    $_SESSION["user"] = $_POST["user"];
+                    $_SESSION["pass"] = $_POST["pass"];
+                } else {
+                    session_unset();
+                    session_destroy();
+                    redirect("incorrect_login.html");
+                }
+            } elseif(array_key_exists($_POST["user"], $logins) and $_POST["pass"] == $logins[$_POST["user"]]) {
+                while(true){
+                    break;
+                }
             } else {
                 session_unset();
                 session_destroy();
-                redirect("incorrect_login.html");
+                redirect("incorrect.html");
             }
-        } elseif(array_key_exists($_POST["user"], $logins) and $_POST["pass"] == $logins[$_POST["user"]]) {
-            while(true){
-                break;
-            }
-        } else {
-            session_unset();
-            session_destroy();
-            redirect("incorrect.html");
-        }
-    ?>
+        ?>
 
-        <div id="login-button">
-            <a href="">
-                <i class="fas fa-user"></i>
-                Login
-            </a>
-        </div>
+        <?php
+            if(isset($_SESSION["user"])){
+                echo "<div id=\"login-button\">
+                    <i class=\"fas fa-user\"></i>
+                        Signed in as {$_SESSION["user"]} |
+                        <a href=\"logout.php\">
+                            Logout
+                        </a>
+                    </div>";
+            } else {
+                echo "<div id=\"login-button\">
+                        <a href=\"login.html\">
+                            <i class=\"fas fa-user\"></i>
+                            Login
+                        </a>
+                    </div>";
+            }
+        ?>
 
         <br>
 
@@ -80,7 +92,7 @@
         </div>
 
         <nav class="nav">
-            <a href="index.html">Home</a>
+            <a href="index.php">Home</a>
             <a href="">My Ratings</a>
             <a href="">Recommend a Movie</a>
         </nav>

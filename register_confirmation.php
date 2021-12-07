@@ -23,22 +23,34 @@
         <link rel="shortcut icon" type="image/jpg" href="favicon.ico"/>
     </head>
     <body>
-    <?php
-        $mysqli = new mysqli("localhost", "root", "", "recommender");
+        <?php
+            $mysqli = new mysqli("localhost", "root", "", "recommender");
 
-        $query = "INSERT INTO users (name, username, password) VALUES ('{$_POST["name"]}', '{$_POST["user"]}', '{$_POST["pass"]}')";
-        mysqli_query($mysqli, $query);
+            $query = "INSERT INTO users (name, username, password) VALUES ('{$_POST["name"]}', '{$_POST["user"]}', '{$_POST["pass"]}')";
+            mysqli_query($mysqli, $query);
 
-        $_SESSION["user"] = $_POST["user"];
-        $_SESSION["pass"] = $_POST["pass"];
-    ?>
+            $_SESSION["user"] = $_POST["user"];
+            $_SESSION["pass"] = $_POST["pass"];
+        ?>
 
-        <div id="login-button">
-            <a href="">
-                <i class="fas fa-user"></i>
-                Login
-            </a>
-        </div>
+        <?php
+            if(isset($_SESSION["user"])){
+                echo "<div id=\"login-button\">
+                    <i class=\"fas fa-user\"></i>
+                        Signed in as {$_SESSION["user"]} |
+                        <a href=\"logout.php\">
+                            Logout
+                        </a>
+                    </div>";
+            } else {
+                echo "<div id=\"login-button\">
+                        <a href=\"login.html\">
+                            <i class=\"fas fa-user\"></i>
+                            Login
+                        </a>
+                    </div>";
+            }
+        ?>
 
         <br>
 

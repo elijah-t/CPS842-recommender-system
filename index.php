@@ -1,3 +1,7 @@
+<?php
+    session_start();
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -19,14 +23,25 @@
         <link rel="shortcut icon" type="image/jpg" href="favicon.ico"/>
     </head>
     <body>
-
-        <div id="login-button">
-            <a href="login.html">
-                <i class="fas fa-user"></i>
-                Login
-            </a>
-        </div>
-
+        <?php
+            if(isset($_SESSION["user"])){
+                echo "<div id=\"login-button\">
+                    <i class=\"fas fa-user\"></i>
+                        Signed in as {$_SESSION["user"]} |
+                        <a href=\"logout.php\">
+                            Logout
+                        </a>
+                    </div>";
+            } else {
+                echo "<div id=\"login-button\">
+                        <a href=\"login.html\">
+                            <i class=\"fas fa-user\"></i>
+                            Login
+                        </a>
+                    </div>";
+            }
+        ?>
+        
         <br>
 
         <div class="header">
