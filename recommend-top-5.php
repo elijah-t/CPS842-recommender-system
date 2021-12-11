@@ -65,5 +65,60 @@
         <br>
 
         <?php
+            $conn = mysqli_connect("localhost", "root", "", "recommender");
+
+            function getUserID($mysqli){
+                $query = "SELECT user_id FROM users WHERE username=\"{$_SESSION['user']}\"";
+                $result = mysqli_query($mysqli, $query);
+                $row = mysqli_fetch_array($result);
+
+                return $row[0];
+            }
+
+            function getFromMovieTable($mysqli, $movieid, $column) {
+                $query = "SELECT {$column} FROM movie WHERE id={$movieid}";
+                $result = mysqli_query($mysqli, $query);
+                $row = mysqli_fetch_array($result);
+
+                return $row[0];
+            }
+
+            $command = escapeshellcmd("python recommender.py 15 3 1");
+            $output = shell_exec($command);
         
+            $arr = explode(",", $output);
+            $id_arr = array();
+            $rating_arr = array();
+        
+            for($i = 0; $i < count($arr)-1; $i++){
+                $exploded = explode(" ", $arr[$i]);
+                array_push($id_arr, $exploded[0]);
+                array_push($rating_arr, $exploded[1]);
+            }
+        
+            // echo "<br>";
+            // print_r($id_arr);
+            // echo "<br>";
+            // print_r($rating_arr);
+
+            echo "<table>
+            <tr>
+            <th>Poster</th>
+            <th>Title</th>
+            <th>Your Recommended Rating</th>
+            </tr>";
+
+            for($i = 0; $i < count($id_arr); $i++){
+                echo "<tr>";
+                echo "<td><img src=" . getFromMovieTable($conn, $id_arr[$i], "url") . "></td>";
+                echo "<td><a style=\"color:white;\"href=\"https://www.imdb.com/title/" 
+                . getFromMovieTable($conn, $id_arr[$i], 'imdb') . "/\">"
+                . getFromMovieTable($conn, $id_arr[$i], 'title') . "</a></td>";
+                echo "<td>" . $rating_arr[$i] . "</td>";
+                echo "<tr>";
+            }
+
+            echo "</table>"
+            
+            
         ?>

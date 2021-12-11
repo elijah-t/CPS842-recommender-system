@@ -1,5 +1,4 @@
 <?php
-
     $command = escapeshellcmd("python recommender.py 15 3 1");
     $output = shell_exec($command);
     echo $output;
