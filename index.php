@@ -24,6 +24,10 @@
     </head>
     <body>
         <?php
+            $command = escapeshellcmd('python recomender-working.py 990');
+            $output = shell_exec($command);
+            echo $output;
+
             if(isset($_SESSION["user"])){
                 echo "<div id=\"login-button\">
                     <i class=\"fas fa-user\"></i>
@@ -49,67 +53,84 @@
         </div>
 
         <nav class="nav">
-            <a href="index.html">Home</a>
+            <a href="index.php">Home</a>
             <a href="">My Ratings</a>
             <a href="">Recommend a Movie</a>
         </nav>
 
         <div class="searchbar">
-            <input type="text" placeholder=" Search for movie ratings..." name="search" id="search">
+            <input type="text" placeholder=" Search for movies..." name="search" id="search">
         </div>
         
         <br>
-        <div>
-            <ul>
-                <li style="list-style-type:none;">
-                    <div class="movie">
-                        <img src="images/toystory.jpg" class="movie-poster">
-    
-                        <h2>Toy Story</h2>
-    
-                        <p>Average rating:</p>
-    
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-    
-                        <p>Rate this movie:</p>
-    
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                    </div>
-                </li>
-    
-                <li style="list-style-type:none;">
-                    <div class="movie">
-                        <img src="images/titanic.jpg" class="movie-poster">
-    
-                        <h2>Titanic</h2>
-    
-                        <p>Average rating:</p>
-    
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-    
-                        <p>Rate this movie:</p>
-    
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
-                    </div>
-                </li>
-            </ul>
-        </div>
+
+        <?php
+            $conn = mysqli_connect("localhost", "root", "", "recommender");
+
+            $res_per_page = 5;
+
+            $res = mysqli_query($conn, "SELECT * FROM movie");
+            $num_res = mysqli_num_rows($res);
+
+            $num_pages = ceil($num_res / $res_per_page);
+
+            if(!isset($_GET['page'])) {
+                $page = 1;
+            } else {
+                $page = $_GET['page'];
+            }
+
+            $page_first_res = ($page-1) * $res_per_page;
+
+            $query = "SELECT * FROM movie ORDER BY title LIMIT" . " " . $page_first_res . "," . $res_per_page;
+            $res = mysqli_query($conn, $query);
+            
+            echo "<table>
+                <tr>
+                <th>Poster</th>
+                <th>Title</th>
+                <th>Your Rating</th>
+                </tr>";
+            
+            while($row = mysqli_fetch_array($res)) {
+                echo "<tr>";
+                echo "<td><img src=" . $row['url'] . "></td>";
+                echo "<td>" . $row['title'] . "</td>";
+                echo "<td>
+                    <form action=\"rating-submit.php\" method=\"post\">
+                        <select name=\"rating\">
+                            <option value=\"0\">0</option>
+                            <option value=\"1\">1</option>
+                            <option value=\"2\">2</option>
+                            <option value=\"3\">3</option>
+                            <option value=\"4\">4</option>
+                            <option value=\"5\">5</option>
+                        </select>
+                        <input type=\"hidden\" name=\"movie\"value=\"{$row['title']}\"
+                        <br>
+                        <br>
+                        <br>
+                        <input type=\"submit\">
+                    </form>
+                </td>";
+                
+                echo "</tr>";
+            }
+            echo "</table>";
+
+            echo "<div class=\"page-num\">";
+            if($page >= 2) {   
+                echo "<a href='index.php?page=".($page-1)."'> Prev </a>";
+            }
+
+            for($pageNum = 1; $pageNum<=$num_pages; $pageNum++) {  
+                echo '<a href="index.php?page=' . $pageNum . '"> '. $pageNum . ' </a>';  
+            }
+            if($page < $num_pages){
+                echo "<a href='index.php?page=".($page+1)."'>Next</a>";   
+            }
+            echo "</div>"
+        ?>
 
     </body>
 </html>

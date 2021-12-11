@@ -4,15 +4,29 @@ a {
 }
 
 body {
-    background-image: url("images/background.jpg");
+    background-color: rgb(25,25,23);
+    color:whitesmoke;
 }
 
 h2 {
-    font-family: 'Libre Baskerville', serif
+    font-family: 'Libre Baskerville', serif;
 }
 
 p {
-    font-family: 'Libre Baskerville', serif
+    font-family: 'Libre Baskerville', serif;
+}
+
+table {
+    margin:auto;
+    text-align:center;
+}
+
+th, td {
+    font-family: 'Libre Baskerville', serif;
+    border: 1px solid #dddddd;
+    background-color: rgb(211,211,211, 0.3);
+    padding-right: 75px;
+    padding-left: 75px;
 }
 
 .checked {
@@ -68,10 +82,33 @@ p {
     border: 2px solid black;
 }
 
+.page-num {
+    text-align:center;
+    font-family: 'Libre Baskerville', serif;
+}
+
+.page-num > a {
+    background-color: #f1f1f1;
+    margin: 10px;
+    line-height: 50px;
+    font-size: 20px;
+    border: 1px solid rgb(0,0,0, 0.5);
+    padding: 5px;
+}
+
+.page-num > a:hover {
+    background-color: pink;
+}
+
 #login-button {
     float:right;
     font-family: 'Libre Baskerville', serif;
     font-size: 20px;
+    color: white !important; 
+}
+
+#login-button > * {
+    color: white !important; 
 }
 
 #search {
