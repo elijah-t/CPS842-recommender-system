@@ -58,14 +58,32 @@
             <a href="recommend-me.php">Recommend a Movie</a>
         </nav>
 
-        <div class="searchbar">
-            <input type="text" placeholder=" Search for movies..." name="search" id="search">
-        </div>
-        
-        <br>
-
         <?php
             $conn = mysqli_connect("localhost", "root", "", "recommender");
+
+            function getUserID($mysqli){
+                $query = "SELECT user_id FROM users WHERE username=\"{$_SESSION['user']}\"";
+                $result = mysqli_query($mysqli, $query);
+                $row = mysqli_fetch_array($result);
+        
+                return $row[0];
+            }
+
+            function getMovieTitle($mysqli, $movieID){
+                $query = "SELECT title FROM movie WHERE id={$movieID}";
+                $result = mysqli_query($mysqli, $query);
+                $row = mysqli_fetch_array($result);
+
+                return $row[0];
+            }
+
+            function getMoviePoster($mysqli, $movieID){
+                $query = "SELECT url FROM movie WHERE id={$movieID}";
+                $result = mysqli_query($mysqli, $query);
+                $row = mysqli_fetch_array($result);
+
+                return $row[0];
+            }
 
             $res_per_page = 10;
 
@@ -81,8 +99,9 @@
             }
 
             $page_first_res = ($page-1) * $res_per_page;
+            $uID = getUserID($conn);
 
-            $query = "SELECT * FROM movie ORDER BY title LIMIT" . " " . $page_first_res . "," . $res_per_page;
+            $query = "SELECT * FROM `ratings` WHERE userId={$uID} LIMIT " . " " . $page_first_res . "," . $res_per_page;
             $res = mysqli_query($conn, $query);
             
             echo "<table>
@@ -94,43 +113,23 @@
             
             while($row = mysqli_fetch_array($res)) {
                 echo "<tr>";
-                echo "<td><img src=" . $row['url'] . "></td>";
-                echo "<td><a style=\"color:white;\"href=\"https://www.imdb.com/title/{$row['imdb']}/\">" . $row['title'] . "</a></td>";
-                echo "<td>
-                    <form action=\"rating-submit.php\" method=\"post\">
-                        <select name=\"rating\">
-                            <option value=\"0\">0</option>
-                            <option value=\"1\">1</option>
-                            <option value=\"2\">2</option>
-                            <option value=\"3\">3</option>
-                            <option value=\"4\">4</option>
-                            <option value=\"5\">5</option>
-                        </select>
-                        <input type=\"hidden\" name=\"movie\"value=\"{$row['title']}\"
-                        <br>
-                        <br>
-                        <br>
-                        <input type=\"submit\">
-                    </form>
-                </td>";
-                
+                echo "<td><img src=" . getMoviePoster($conn, $row['movieId']) . "></td>";
+                echo "<td>" . getMovieTitle($conn, $row['movieId']) . "</td>";
+                echo "<td>" . $row['rating'] . "</td>";
                 echo "</tr>";
             }
             echo "</table>";
 
             echo "<div class=\"page-num\">";
             if($page >= 2) {   
-                echo "<a href='index.php?page=".($page-1)."'> Prev </a>";
+                echo "<a href='my-ratings.php?page=".($page-1)."'> Prev </a>";
             }
 
             for($pageNum = 1; $pageNum<=$num_pages; $pageNum++) {  
-                echo '<a href="index.php?page=' . $pageNum . '"> '. $pageNum . ' </a>';  
+                echo '<a href="my-ratings.php?page=' . $pageNum . '"> '. $pageNum . ' </a>';  
             }
             if($page < $num_pages){
-                echo "<a href='index.php?page=".($page+1)."'>Next</a>";   
+                echo "<a href='my-ratings.php?page=".($page+1)."'>Next</a>";   
             }
             echo "</div>"
         ?>
-
-    </body>
-</html>

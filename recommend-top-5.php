@@ -1,3 +1,7 @@
+<?php
+    session_start();
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -19,14 +23,29 @@
         <link rel="shortcut icon" type="image/jpg" href="favicon.ico"/>
     </head>
     <body>
+        <?php
+            $command = escapeshellcmd('python recomender-working.py 990');
+            $output = shell_exec($command);
+            echo $output;
 
-        <div id="login-button">
-            <a href="">
-                <i class="fas fa-user"></i>
-                Login
-            </a>
-        </div>
-
+            if(isset($_SESSION["user"])){
+                echo "<div id=\"login-button\">
+                    <i class=\"fas fa-user\"></i>
+                        Signed in as {$_SESSION["user"]} |
+                        <a href=\"logout.php\">
+                            Logout
+                        </a>
+                    </div>";
+            } else {
+                echo "<div id=\"login-button\">
+                        <a href=\"login.html\">
+                            <i class=\"fas fa-user\"></i>
+                            Login
+                        </a>
+                    </div>";
+            }
+        ?>
+        
         <br>
 
         <div class="header">
@@ -39,18 +58,12 @@
             <a href="recommend-me.php">Recommend a Movie</a>
         </nav>
 
+        <div class="searchbar">
+            <input type="text" placeholder=" Search for movies..." name="search" id="search">
+        </div>
+        
+        <br>
 
-        <form action="login_confirmation.php" method="POST">
-            <div id="login">
-                <br>
-                <p style="text-align:center"><a href="register.html">New user? Click here to register.</a></p>
-                <h2>Log In</h2>
-                <p style="color:red">Your username or password was incorrect.</p>
-                <p> Username </p> <input type="text" name="user" style="width:300px;"  placeholder="Enter Username" required> <br> <br>
-                <p> Password </p> <input type="password" name="pass" style="width:300px;"  placeholder="Enter Password" required>  <br> <br>
-                <input type="submit" value="Log In">
-            </div>
-        </form>
-
-    </body>
-</html>
+        <?php
+        
+        ?>

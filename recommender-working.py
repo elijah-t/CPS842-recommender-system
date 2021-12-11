@@ -2,6 +2,22 @@ import csv
 import itertools
 import math
 import sys
+import mysql.connector
+
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="",
+  database="recommender"
+)
+
+getRatings = mydb.cursor()
+getRatings.execute("SELECT * FROM ratings")
+ratingsTable = getRatings.fetchall()
+
+getMovies = mydb.cursor()
+getMovies.execute("SELECT * FROM movie")
+moviesTable = getMovies.fetchall()
 
 # movies[movieID] = {movieID: movie_name}
 movies = {}
@@ -12,29 +28,30 @@ ratings = {}
 similarities = {}
 usrList = []
 
-current_user = 400
+current_user = int(sys.argv[1])
+givenMovie = int(sys.argv[2])
 
-givenMovie = int(sys.argv[1])
+# current_user = 2
+# givenMovie = 421
+
 
 # with open('movieIDs.csv', 'r') as movieIDs:
-with open('movieIDs.csv', 'r') as movieIDs:
-    mIDs = csv.reader(movieIDs)
+#     mIDs = csv.reader(movieIDs)
 
-    for row in mIDs:
-        if (row[0] != "id"):
-            movies[int(row[0])] = row[1]
+for row in moviesTable:
+    if (row[0] != "id"):
+        movies[int(row[0])] = row[1]
 
 # with open('ratings.csv', 'r') as movieRatings:
-with open('ratings.csv', 'r') as movieRatings:
-    mRatings = csv.reader(movieRatings)
+#     mRatings = csv.reader(movieRatings)
 
-    for row in mRatings:
-        if (row[0] != "userId"):
-            if (int(row[1]) in movies):
-                if (int(row[0]) not in ratings):
-                    ratings[int(row[0])] = {int(row[1]): float(row[2])}
-                else:
-                    ratings[int(row[0])][int(row[1])] = float(row[2])
+for row in ratingsTable:
+    if (row[0] != "userId"):
+        if (int(row[1]) in movies):
+            if (int(row[0]) not in ratings):
+                ratings[int(row[0])] = {int(row[1]): float(row[2])}
+            else:
+                ratings[int(row[0])][int(row[1])] = float(row[2])
 
 for usr in ratings:
     usrList.append(usr)
@@ -43,7 +60,6 @@ for usr in ratings:
 def findPairs(usrList):
     pairs = []
     for pair in itertools.combinations(usrList, 2):
-        # print(pair)
         if ((current_user in pair) and (givenMovie in ratings[pair[0]] or givenMovie in ratings[pair[1]]) and (givenMovie not in ratings[current_user])): #makes sure we only look at similarities of other user with current user
         # if (current_user in pair):
             pairs.append(pair)
@@ -85,24 +101,18 @@ def getSimilarity(pair):
                     sumB = sumB + (ratings[pair[1]][movieID]-avgB)**2
         
         denom = math.sqrt(sumA*sumB)
-    
+        
         return(numerator/denom) #This is the similarity of the given pair
+
     except:
         return(-1)
     
-# def findUnratedMovie(pair):
-#     unrated = 0
-#     for movie in ratings[pair[0]]:
-#         if movie not in ratings[pair[1]]:
-#             unrated = movie
-#     return unrated
-
 def weightedSum():
     denom = 0
     numerator = 0
 
     for pair in findPairs(usrList):
-
+        # print(getSimilarity(pair))
         try:            
             if (getSimilarity(pair) > 0):
                 if (pair[0] == current_user):
@@ -116,40 +126,20 @@ def weightedSum():
             denom += 0
                 
 
-            
+    if (denom == 0):
+            return ("Not enough users have rated this movie")        
     return(numerator/denom)
 
 print(weightedSum())
+# print(ratings[62])
+# print(movies)
+
+# ratings[userID] = {movieID:rating}
 
 
+        
+# print(246 in movies)
+    # print(movie)
 
-#  ---------------------------------------------------------------------------
-def test():
-
-    output = open('fixed.csv', 'w')
-    writer = csv.writer(output)
-
-
-    with open('r.csv', 'r') as movieRatings:
-        mRatings = movieRatings.readlines()
-        for row in mRatings:
-            newRow = row[:-1].split(",")
-            if (newRow[1] != "movieId"):
-                if int(newRow[1]) in movies:
-                    writer.writerow([row[:-1]])
-
-
-def fixFixed():
-    with open('fixed.csv', 'r') as f:
-        fix = f.readlines()
-
-    for line in fix:
-        line = line.replace('"',"")
-        line = line.replace("\n", "")
-        print(line)
 
                 
-
-# test()
-# fixFixed()
-# print(movies)

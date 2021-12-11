@@ -93,8 +93,8 @@
 
         <nav class="nav">
             <a href="index.php">Home</a>
-            <a href="">My Ratings</a>
-            <a href="">Recommend a Movie</a>
+            <a href="my-ratings.php">My Ratings</a>
+            <a href="recommend-me.php">Recommend a Movie</a>
         </nav>
 
         <?php

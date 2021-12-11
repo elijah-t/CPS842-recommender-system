@@ -65,7 +65,16 @@
         <br>
 
         <?php
+
             $conn = mysqli_connect("localhost", "root", "", "recommender");
+            
+            function getUserID($mysqli){
+                $query = "SELECT user_id FROM users WHERE username=\"{$_SESSION['user']}\"";
+                $result = mysqli_query($mysqli, $query);
+                $row = mysqli_fetch_array($result);
+        
+                return $row[0];
+            }
 
             $res_per_page = 10;
 
@@ -89,45 +98,41 @@
                 <tr>
                 <th>Poster</th>
                 <th>Title</th>
-                <th>Your Rating</th>
+                <th>Recommended Rating</th>
                 </tr>";
             
+            $buttonCount = 0;
             while($row = mysqli_fetch_array($res)) {
                 echo "<tr>";
                 echo "<td><img src=" . $row['url'] . "></td>";
-                echo "<td><a style=\"color:white;\"href=\"https://www.imdb.com/title/{$row['imdb']}/\">" . $row['title'] . "</a></td>";
-                echo "<td>
-                    <form action=\"rating-submit.php\" method=\"post\">
-                        <select name=\"rating\">
-                            <option value=\"0\">0</option>
-                            <option value=\"1\">1</option>
-                            <option value=\"2\">2</option>
-                            <option value=\"3\">3</option>
-                            <option value=\"4\">4</option>
-                            <option value=\"5\">5</option>
-                        </select>
-                        <input type=\"hidden\" name=\"movie\"value=\"{$row['title']}\"
-                        <br>
-                        <br>
-                        <br>
-                        <input type=\"submit\">
-                    </form>
-                </td>";
-                
+                echo "<td>" . $row['title'] . "</td>";
+                echo "<td>";
+                if(array_key_exists("recommend{$buttonCount}", $_POST)) {
+                    $command = escapeshellcmd('python recommender-working.py ' . getUserID($conn) . " " . $row['id']);
+                    $output = shell_exec($command);
+                    echo $output;
+                    // echo getUserID($conn) . "<br>";
+                    // echo $row['movie_id'];
+                }
+                echo "<form method=\"post\">
+                        <input type=\"submit\" name=\"recommend{$buttonCount}\" value=\"Recommend\"></input>
+                        <br>";
+                echo "</form></td>";
                 echo "</tr>";
+                $buttonCount++;
             }
             echo "</table>";
 
             echo "<div class=\"page-num\">";
             if($page >= 2) {   
-                echo "<a href='index.php?page=".($page-1)."'> Prev </a>";
+                echo "<a href='recommend-me.php?page=".($page-1)."'> Prev </a>";
             }
 
             for($pageNum = 1; $pageNum<=$num_pages; $pageNum++) {  
-                echo '<a href="index.php?page=' . $pageNum . '"> '. $pageNum . ' </a>';  
+                echo '<a href="recommend-me.php?page=' . $pageNum . '"> '. $pageNum . ' </a>';  
             }
             if($page < $num_pages){
-                echo "<a href='index.php?page=".($page+1)."'>Next</a>";   
+                echo "<a href='recommend-me.php?page=".($page+1)."'>Next</a>";   
             }
             echo "</div>"
         ?>
