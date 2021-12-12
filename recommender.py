@@ -151,10 +151,11 @@ else:
 
     recomendedMovies = {}
     for movie in movies:
+        if movie not in ratings[current_user]:
         # rating = weightedSum()
-        givenMovie = movie
-        if isinstance(weightedSum(), float):
-            recomendedMovies[movie] = weightedSum()
+            givenMovie = movie
+            if isinstance(weightedSum(), float):
+                recomendedMovies[movie] = weightedSum()
 
     top5 = sorted(recomendedMovies, key=recomendedMovies.get, reverse=True)[:5]
 

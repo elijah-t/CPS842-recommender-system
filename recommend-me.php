@@ -83,7 +83,7 @@
                 return $row[0];
             }
 
-            $command = escapeshellcmd("python recommender.py 15 3 1");
+            $command = escapeshellcmd("python recommender.py " . getUserID($conn) . " 3 1");
             $output = shell_exec($command);
         
             $arr = explode(",", $output);
