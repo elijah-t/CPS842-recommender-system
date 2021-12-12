@@ -65,77 +65,60 @@
         <br>
 
         <?php
-
             $conn = mysqli_connect("localhost", "root", "", "recommender");
-            
+
             function getUserID($mysqli){
                 $query = "SELECT user_id FROM users WHERE username=\"{$_SESSION['user']}\"";
                 $result = mysqli_query($mysqli, $query);
                 $row = mysqli_fetch_array($result);
-        
+
                 return $row[0];
             }
 
-            $res_per_page = 10;
+            function getFromMovieTable($mysqli, $movieid, $column) {
+                $query = "SELECT {$column} FROM movie WHERE id={$movieid}";
+                $result = mysqli_query($mysqli, $query);
+                $row = mysqli_fetch_array($result);
 
-            $res = mysqli_query($conn, "SELECT * FROM movie");
-            $num_res = mysqli_num_rows($res);
-
-            $num_pages = ceil($num_res / $res_per_page);
-
-            if(!isset($_GET['page'])) {
-                $page = 1;
-            } else {
-                $page = $_GET['page'];
+                return $row[0];
             }
 
-            $page_first_res = ($page-1) * $res_per_page;
+            $command = escapeshellcmd("python recommender.py 15 3 1");
+            $output = shell_exec($command);
+        
+            $arr = explode(",", $output);
+            $id_arr = array();
+            $rating_arr = array();
+        
+            for($i = 0; $i < count($arr)-1; $i++){
+                $exploded = explode(" ", $arr[$i]);
+                array_push($id_arr, $exploded[0]);
+                array_push($rating_arr, $exploded[1]);
+            }
+        
+            // echo "<br>";
+            // print_r($id_arr);
+            // echo "<br>";
+            // print_r($rating_arr);
 
-            $query = "SELECT * FROM movie ORDER BY title LIMIT" . " " . $page_first_res . "," . $res_per_page;
-            $res = mysqli_query($conn, $query);
-            
             echo "<table>
-                <tr>
-                <th>Poster</th>
-                <th>Title</th>
-                <th>Recommended Rating</th>
-                </tr>";
-            
-            $buttonCount = 0;
-            while($row = mysqli_fetch_array($res)) {
+            <tr>
+            <th>Poster</th>
+            <th>Title</th>
+            <th>Your Recommended Rating</th>
+            </tr>";
+
+            for($i = 0; $i < count($id_arr); $i++){
                 echo "<tr>";
-                echo "<td><img src=" . $row['url'] . "></td>";
-                echo "<td>" . $row['title'] . "</td>";
-                echo "<td>";
-                if(array_key_exists("recommend{$buttonCount}", $_POST)) {
-                    $command = escapeshellcmd('python recommender-working.py ' . getUserID($conn) . " " . $row['id']);
-                    $output = shell_exec($command);
-                    echo $output;
-                    // echo getUserID($conn) . "<br>";
-                    // echo $row['movie_id'];
-                }
-                echo "<form method=\"post\">
-                        <input type=\"submit\" name=\"recommend{$buttonCount}\" value=\"Recommend\"></input>
-                        <br>";
-                echo "</form></td>";
-                echo "</tr>";
-                $buttonCount++;
-            }
-            echo "</table>";
-
-            echo "<div class=\"page-num\">";
-            if($page >= 2) {   
-                echo "<a href='recommend-me.php?page=".($page-1)."'> Prev </a>";
+                echo "<td><img src=" . getFromMovieTable($conn, $id_arr[$i], "url") . "></td>";
+                echo "<td><a style=\"color:white;\"href=\"https://www.imdb.com/title/" 
+                . getFromMovieTable($conn, $id_arr[$i], 'imdb') . "/\">"
+                . getFromMovieTable($conn, $id_arr[$i], 'title') . "</a></td>";
+                echo "<td>" . $rating_arr[$i] . "</td>";
+                echo "<tr>";
             }
 
-            for($pageNum = 1; $pageNum<=$num_pages; $pageNum++) {  
-                echo '<a href="recommend-me.php?page=' . $pageNum . '"> '. $pageNum . ' </a>';  
-            }
-            if($page < $num_pages){
-                echo "<a href='recommend-me.php?page=".($page+1)."'>Next</a>";   
-            }
-            echo "</div>"
+            echo "</table>"
+            
+            
         ?>
-
-    </body>
-</html>
